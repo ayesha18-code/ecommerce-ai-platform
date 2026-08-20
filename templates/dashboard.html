@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <title>E-Commerce Intelligence Dashboard</title>
@@ -53,7 +53,7 @@
     </table>
 </div>
 
-<!-- Recommendations (dummy for now) -->
+<!-- Recommendations -->
 <div class="reco-container">
     <h2>Recommended for You</h2>
     <div class="reco-cards">
@@ -64,21 +64,53 @@
         </div>
         {% endfor %}
     </div>
-    <p class="note">*Sample recommendations — will connect to actual recommendation model soon.</p>
+    <p class="note">*Recommendations shown based on the recommendation model.</p>
 </div>
 
 <script>
+// Data passed from Flask
+const monthlyLabels = {{ monthly_labels|safe }};
+const monthlyValues = {{ monthly_values|safe }};
+const topProductLabels = {{ top_product_labels|safe }};
+const topProductValues = {{ top_product_values|safe }};
+
+console.log("Monthly Labels:", monthlyLabels);
+console.log("Monthly Values:", monthlyValues);
+console.log("Top Product Labels:", topProductLabels);
+console.log("Top Product Values:", topProductValues);
+
 // Monthly Sales Line Chart
 new Chart(document.getElementById('monthlyChart'), {
     type: 'line',
     data: {
-        labels: {{ monthly_labels|tojson }},
+        labels: monthlyLabels,
         datasets: [{
             label: 'Revenue (R$)',
-            data: {{ monthly_values|tojson }},
+            data: monthlyValues,
             borderColor: '#2ecc71',
-            fill: false,
+            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+            fill: true,
+            tension: 0.2
         }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    autoSkip: true,
+                    maxTicksLimit: 12,
+                    maxRotation: 45,
+                    minRotation: 45
+                }
+            },
+            y: {
+                beginAtZero: true
+            }
+        }
     }
 });
 
@@ -86,12 +118,24 @@ new Chart(document.getElementById('monthlyChart'), {
 new Chart(document.getElementById('productChart'), {
     type: 'bar',
     data: {
-        labels: {{ top_product_labels|tojson }},
+        labels: topProductLabels,
         datasets: [{
             label: 'Revenue (R$)',
-            data: {{ top_product_values|tojson }},
+            data: topProductValues,
             backgroundColor: '#3498db',
         }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            x: {
+                beginAtZero: true
+            }
+        }
     }
 });
 </script>

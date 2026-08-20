@@ -26,7 +26,7 @@ def dashboard():
     segment_counts = customer_data['Customer_Category'].value_counts().to_dict()
     segment_revenue = customer_data.groupby('Customer_Category')['total_spend'].sum().round(2).to_dict()
 
-    monthly_labels = monthly_sales['month'].astype(str).tolist()
+    monthly_labels = monthly_sales['month'].astype(str).str.strip().tolist()
     monthly_values = monthly_sales['revenue'].tolist()
 
     top_product_labels = top_products['category'].tolist()
