@@ -8,76 +8,95 @@
 </head>
 <body>
 
-<h1>E-Commerce Customer Intelligence Dashboard</h1>
+<div class="layout">
 
-<!-- KPI Cards -->
-<div class="kpi-container">
-    <div class="kpi-card">
-        <h3>Total Revenue</h3>
-        <p>R$ {{ total_revenue }}</p>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2 class="logo">E-Commerce <span>AI</span></h2>
+        <nav>
+            <a href="#" class="nav-item active">Overview</a>
+            <a href="#segments" class="nav-item">Customers</a>
+            <a href="#sales" class="nav-item">Sales</a>
+            <a href="#reco" class="nav-item">Recommendations</a>
+        </nav>
+        <div class="sidebar-footer">Powered by Flask + ML</div>
     </div>
-    <div class="kpi-card">
-        <h3>Total Customers</h3>
-        <p>{{ total_customers }}</p>
-    </div>
-    <div class="kpi-card">
-        <h3>Avg Order Value</h3>
-        <p>R$ {{ avg_order_value }}</p>
-    </div>
-</div>
 
-<!-- Charts -->
-<div class="chart-container">
-    <div class="chart-box">
-        <h3>Monthly Sales Trend</h3>
-        <canvas id="monthlyChart"></canvas>
-    </div>
-    <div class="chart-box">
-        <h3>Top Product Categories</h3>
-        <canvas id="productChart"></canvas>
-    </div>
-</div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>E-Commerce Customer Intelligence Dashboard</h1>
 
-<!-- Customer Segments -->
-<div class="segment-container">
-    <h2>Customer Segments</h2>
-    <table>
-        <tr><th>Segment</th><th>No. of Customers</th><th>Total Revenue (R$)</th></tr>
-        {% for segment, count in segment_counts.items() %}
-        <tr>
-            <td>{{ segment }}</td>
-            <td>{{ count }}</td>
-            <td>{{ segment_revenue.get(segment, 0) }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
-
-<!-- Recommendations -->
-<div class="reco-container">
-    <h2>Recommended for You</h2>
-    <div class="reco-cards">
-        {% for r in recommendations %}
-        <div class="reco-card">
-            <h4>{{ r.product }}</h4>
-            <p>{{ r.reason }}</p>
+        <!-- KPI Cards -->
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <h3>Total Revenue</h3>
+                <p>R$ {{ total_revenue }}</p>
+            </div>
+            <div class="kpi-card">
+                <h3>Total Customers</h3>
+                <p>{{ total_customers }}</p>
+            </div>
+            <div class="kpi-card">
+                <h3>Avg Order Value</h3>
+                <p>R$ {{ avg_order_value }}</p>
+            </div>
         </div>
-        {% endfor %}
+
+        <!-- Charts -->
+        <div class="chart-container" id="sales">
+            <div class="chart-box">
+                <h3>Monthly Sales Trend</h3>
+                <canvas id="monthlyChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>Top Product Categories</h3>
+                <canvas id="productChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Segments: Table + Donut -->
+        <div class="segment-container" id="segments">
+            <h2>Customer Segments</h2>
+            <div class="segment-flex">
+                <table>
+                    <tr><th>Segment</th><th>No. of Customers</th><th>Total Revenue (R$)</th></tr>
+                    {% for segment, count in segment_counts.items() %}
+                    <tr>
+                        <td>{{ segment }}</td>
+                        <td>{{ count }}</td>
+                        <td>{{ segment_revenue.get(segment, 0) }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <div class="donut-box">
+                    <canvas id="segmentDonut"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="reco-container" id="reco">
+            <h2>Recommended for You</h2>
+            <div class="reco-cards">
+                {% for r in recommendations %}
+                <div class="reco-card">
+                    <h4>{{ r.product }}</h4>
+                    <p>{{ r.reason }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            <p class="note">*Recommendations shown based on the recommendation model.</p>
+        </div>
     </div>
-    <p class="note">*Recommendations shown based on the recommendation model.</p>
 </div>
 
 <script>
-// Data passed from Flask
 const monthlyLabels = {{ monthly_labels|safe }};
 const monthlyValues = {{ monthly_values|safe }};
 const topProductLabels = {{ top_product_labels|safe }};
 const topProductValues = {{ top_product_values|safe }};
-
-console.log("Monthly Labels:", monthlyLabels);
-console.log("Monthly Values:", monthlyValues);
-console.log("Top Product Labels:", topProductLabels);
-console.log("Top Product Values:", topProductValues);
+const segmentLabels = {{ segment_counts.keys()|list|tojson }};
+const segmentValues = {{ segment_counts.values()|list|tojson }};
 
 // Monthly Sales Line Chart
 new Chart(document.getElementById('monthlyChart'), {
@@ -87,29 +106,16 @@ new Chart(document.getElementById('monthlyChart'), {
         datasets: [{
             label: 'Revenue (R$)',
             data: monthlyValues,
-            borderColor: '#2ecc71',
-            backgroundColor: 'rgba(46, 204, 113, 0.1)',
-            fill: true,
+            borderColor: '#167D8D',
+backgroundColor: 'rgba(22, 125, 141, 0.1)',
             tension: 0.2
         }]
     },
     options: {
         responsive: true,
-        plugins: {
-            legend: { display: true }
-        },
         scales: {
-            x: {
-                ticks: {
-                    autoSkip: true,
-                    maxTicksLimit: 12,
-                    maxRotation: 45,
-                    minRotation: 45
-                }
-            },
-            y: {
-                beginAtZero: true
-            }
+            x: { ticks: { autoSkip: true, maxTicksLimit: 12, maxRotation: 45, minRotation: 45 } },
+            y: { beginAtZero: true }
         }
     }
 });
@@ -122,18 +128,34 @@ new Chart(document.getElementById('productChart'), {
         datasets: [{
             label: 'Revenue (R$)',
             data: topProductValues,
-            backgroundColor: '#3498db',
+           backgroundColor: '#4FA3A5',
         }]
     },
     options: {
         responsive: true,
         indexAxis: 'y',
+        scales: { x: { beginAtZero: true } }
+    }
+});
+
+// Customer Segments Donut Chart
+new Chart(document.getElementById('segmentDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: segmentLabels,
+        datasets: [{
+            data: segmentValues,
+           backgroundColor: ['#167D8D', '#4FA3A5', '#F4B942', '#0F2747'],
+            borderColor: '#101010',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
         plugins: {
-            legend: { display: true }
-        },
-        scales: {
-            x: {
-                beginAtZero: true
+            legend: {
+                position: 'bottom',
+                labels: { color: '#e8ddc0' }
             }
         }
     }
