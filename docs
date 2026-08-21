@@ -1,0 +1,30 @@
+Workflow Summary — Sales Analytics + Web Platform Module
+
+1. Data Collection: Olist e-commerce dataset (orders, order_items, products, 
+   customers, payments) loaded via Google Colab.
+
+2. Data Preprocessing: Filtered delivered orders, merged order_items with 
+   orders, customers, and products tables using common keys.
+
+3. Exploratory Analysis: Calculated total revenue, best-selling product 
+   categories, monthly sales trends, and customer-wise spend.
+
+4. Integration with Customer Segmentation: Merged sales data with Member 1's 
+   RFM-based customer segmentation (customer_unique_id as key) to analyze 
+   revenue contribution by customer segment.
+
+5. Database Setup: Converted processed CSV outputs into a SQLite database 
+   (ecommerce.db) with tables — monthly_sales, top_products, customer_data.
+
+6. Backend Development: Built a Flask application to query the database 
+   and serve data to the frontend.
+
+7. Dashboard Development: Created an interactive dashboard using Chart.js 
+   showing KPIs, sales trends, top products, and customer segment breakdown.
+
+8. Recommendation Integration: Integrated Member 2's recommendation system 
+   output into the dashboard, displaying personalized product suggestions.
+
+9. Final Integration: Combined all three members' modules (segmentation, 
+   recommendation, sales analytics) into a single working platform, 
+   deployed locally via Flask.
