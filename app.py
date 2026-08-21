@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, jsonify
 import sqlite3
 import pandas as pd
@@ -32,12 +31,24 @@ def dashboard():
     top_product_labels = top_products['category'].tolist()
     top_product_values = top_products['revenue'].tolist()
 
-    dummy_recommendations = [
-        {"product": "Bed & Bath Linen", "reason": "Popular in your segment"},
-        {"product": "Health & Beauty", "reason": "Frequently bought together"},
-        {"product": "Sports & Leisure", "reason": "Trending this month"},
-        {"product": "Electronics", "reason": "Based on similar customers"},
-    ]
+    # ---- Member 2's Recommendations (real data, with fallback) ----
+    try:
+        reco_df = pd.read_csv('data/recommendations.csv')
+        reco_df = reco_df.sort_values('final_product_score', ascending=False).head(4)
+        recommendations = [
+            {
+                "product": row['product_category_name_english'].replace('_', ' ').title(),
+                "reason": f"Match score: {round(row['final_product_score'], 2)}"
+            }
+            for _, row in reco_df.iterrows()
+        ]
+    except Exception as e:
+        recommendations = [
+            {"product": "Bed & Bath Linen", "reason": "Popular in your segment"},
+            {"product": "Health & Beauty", "reason": "Frequently bought together"},
+            {"product": "Sports & Leisure", "reason": "Trending this month"},
+            {"product": "Electronics", "reason": "Based on similar customers"},
+        ]
 
     return render_template(
         'dashboard.html',
@@ -50,7 +61,7 @@ def dashboard():
         monthly_values=json.dumps(monthly_values),
         top_product_labels=json.dumps(top_product_labels),
         top_product_values=json.dumps(top_product_values),
-        recommendations=dummy_recommendations,
+        recommendations=recommendations,
     )
 
 
